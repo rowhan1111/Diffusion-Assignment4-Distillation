@@ -63,11 +63,15 @@ class StableDiffusion(nn.Module):
         guidance_scale=100, 
         grad_scale=1,
     ):
-        
         # TODO: Implement the loss function for SDS
-        
-        raise NotImplementedError("SDS is not implemented yet.")
-    
+        t = torch.randint(1, self.num_train_timesteps, (1, ))
+        rand_noise = torch.randn_like(latents)
+        noisy_latent = torch.sqrt(self.alphas[t-1]) * latents + torch.sqrt(1 - self.alphas[t-1]) * rand_noise
+        with torch.no_grad():
+            noise_pred = self.get_noise_preds(noisy_latent, t.to(self.device), text_embeddings, guidance_scale)
+        return torch.sqrt(torch.square(noise_pred - noisy_latent)).mean()
+
+
     
     def get_pds_loss(
         self, src_latents, tgt_latents, 
