@@ -64,15 +64,27 @@ class StableDiffusion(nn.Module):
         grad_scale=1,
     ):
         # TODO: Implement the loss function for SDS
-        # latents = x_t? 
-        
-        t = torch.randint(self.min_step, self.max_step, (1,))
-        noise = torch.randn_like(latents, requires_grad=True)
+        t = torch.randint(self.min_step, self.max_step, (1,), device=self.device)
         alpha_t = self.alphas[t]
-        latents_noisy = torch.sqrt(alpha_t) * latents + torch.sqrt(1 - alpha_t) * noise
+        noisy_latent = torch.sqrt(alpha_t) * latents + torch.sqrt(1 - alpha_t) * torch.randn_like(latents)
         with torch.no_grad():
-            noise_pred = self.get_noise_preds(latents_noisy, t.to(self.device), text_embeddings, guidance_scale)
-        return torch.mean((noise_pred - noise) ** 2) * grad_scale
+            noise_pred = self.get_noise_preds(noisy_latent, t, text_embeddings, guidance_scale)
+        return torch.mean((noise_pred - (noisy_latent - torch.sqrt(alpha_t) * latents)/(torch.sqrt(1-alpha_t))) ** 2) * grad_scale
+
+        '''t = torch.randint(self.min_step, self.max_step, (1,), device=self.device)
+        noise = torch.randn_like(latents, device=self.device, requires_grad=True)
+
+        alpha_t = self.alphas[t]
+`
+        noisy_latent = torch.sqrt(alpha_t) * latents + torch.sqrt(1 - alpha_t) * noise
+        
+        with torch.no_grad():
+            # Get the noise predictions from the model
+            noise_pred = self.get_noise_preds(noisy_latent, t, text_embeddings, guidance_scale).detach()
+        
+        # Calculate the loss based on the predicted noise and actual noise
+        loss = torch.mean((noise_pred - noise) ** 2) * grad_scale
+        return loss'''
 
 
     
