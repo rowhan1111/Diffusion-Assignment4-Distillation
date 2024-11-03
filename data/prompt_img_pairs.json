@@ -3,7 +3,7 @@
     "A_red_bus_driving_on_a_desert_road": {
         "prompt": "A red bus driving on a desert road",
         "edit_prompt": "A yellow school bus driving on a desert road",
-        "img_path": "$HOME/data/imgs/A_red_bus_driving_on_a_desert_road.png"
+        "img_path": "data/imgs/A_red_bus_driving_on_a_desert_road.png"
     },
     "a_boat_in_a_river": {
         "prompt": "a boat in a river",

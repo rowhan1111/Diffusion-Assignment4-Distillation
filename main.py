@@ -104,6 +104,13 @@ def run(args):
                 src_text_embedding=text_embeddings, tgt_text_embedding=edit_embeddings,
                 guidance_scale=guidance_scale, 
             )
+        
+        elif args.loss_type == "vsd":
+            loss = model.get_vsd_loss(
+                latents=latents,
+                text_embeddings=text_embeddings, 
+                guidance_scale=guidance_scale,
+            )
             
         else:
             raise ValueError("Invalid loss type")
@@ -121,7 +128,7 @@ def run(args):
                 print("Step: {}, Loss: {}".format(step, loss.item()))
             
     img = model.decode_latents(latents)
-    if args.loss_type == "sds":
+    if args.loss_type == "sds" or args.loss_type == "vsd":
         prompt_key = args.prompt.replace(" ", "_")
     else:
         prompt_key = args.edit_prompt.replace(" ", "_")
@@ -153,7 +160,7 @@ def parse_args():
     
 def main():
     args = parse_args()
-    assert args.loss_type in ["sds", "pds"], "Invalid loss type"
+    assert args.loss_type in ["sds", "pds", "vsd"], "Invalid loss type"
     if args.loss_type in ["pds"]:
         assert args.edit_prompt is not None, f"edit_prompt is required for {args.loss_type}"
         assert args.src_img_path is not None, f"src_img_path is required for {args.loss_type}"
